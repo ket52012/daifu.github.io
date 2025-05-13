@@ -6,14 +6,20 @@
     <title>胡广生代付计算器</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             font-family: Arial, sans-serif;
             max-width: 1200px;
             margin: 20px auto;
             padding: 10px;
             text-align: center;
-            background: url('https://images.unsplash.com/photo-1506748686214-e9df14d4d9d0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
             background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-color: #f0f0f0; /* 回退背景色 */
         }
         #meteorCanvas {
             position: fixed;
@@ -24,25 +30,27 @@
             z-index: 0;
             pointer-events: none;
         }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1;
+            margin: 10px 0;
+            max-width: none; /* 移除宽度限制 */
+        }
         .calculator-container {
             display: flex;
             flex-wrap: wrap;
             align-items: flex-start;
             justify-content: center;
             gap: 20px;
-            width: 100%;
         }
-        .stats-section, .calculator {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 1;
+        .calculator, .stats-section, .simple-calculator, .trx-converter {
             width: 100%;
             max-width: 300px;
-            box-sizing: border-box;
         }
-        .stats-section h3, .calculator h2 {
-            margin: 0 0 10px 0;
+        h2, h3 {
+            margin: 0 0 10px;
             color: #333;
             font-size: clamp(1em, 3vw, 1.5em);
         }
@@ -57,7 +65,6 @@
             max-width: 200px;
             margin-bottom: 10px;
             font-size: clamp(0.9em, 2.5vw, 1em);
-            box-sizing: border-box;
         }
         input[readonly] {
             background-color: #e9ecef;
@@ -69,10 +76,10 @@
         #remainingDeposit.negative {
             background-color: #ffcccc;
         }
-        #realTimeRate, #fetchTime { 
-            font-size: clamp(0.8em, 2vw, 0.9em); 
-            color: #555; 
-            margin: 5px 0; 
+        #realTimeRate, #fetchTime {
+            font-size: clamp(0.8em, 2vw, 0.9em);
+            color: #555;
+            margin: 5px 0;
         }
         .action-buttons {
             margin-top: 20px;
@@ -80,216 +87,199 @@
             justify-content: space-between;
             gap: 10px;
         }
-        .screenshot-button, .copy-result-button {
+        .btn {
             padding: 10px 20px;
-            background-color: #ff4500;
-            color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: clamp(0.9em, 2.5vw, 1em);
             width: 48%;
-            box-sizing: border-box;
+        }
+        .screenshot-button, .copy-result-button {
+            background-color: #ff4500;
+            color: white;
         }
         .screenshot-button:hover, .copy-result-button:hover {
             background-color: #cc3700;
         }
+        .contact-button {
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            display: block;
+            margin: 10px auto 0;
+            width: 150px;
+        }
+        .contact-button:hover {
+            background-color: #0056b3;
+        }
         .simple-calculator, .trx-converter {
             margin-top: 20px;
-            padding: 10px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 100%;
-            max-width: 300px;
-            box-sizing: border-box;
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-        .simple-calculator h3, .trx-converter h3 {
-            margin: 0 0 10px 0;
-            font-size: clamp(1em, 3vw, 1.5em);
         }
         .simple-calculator input[type="text"], .trx-converter input[type="number"] {
-            width: 100%;
             max-width: 280px;
             padding: 8px;
-            font-size: clamp(0.9em, 2.5vw, 1em);
-        }
-        .simple-calculator input[readonly], .trx-converter input[readonly] {
-            margin-top: 10px;
-            background-color: #e9ecef;
         }
         .simple-calculator p, .trx-converter p {
             font-size: clamp(0.8em, 2vw, 0.9em);
             color: #666;
             margin: 5px 0;
         }
-        .trx-converter label {
-            display: block;
-            margin: 5px 0;
-            width: 100%;
-        }
-        .trx-converter input {
-            width: 100%;
-            max-width: 280px;
-        }
-        .contact-button {
-            display: block;
-            margin: 10px auto 0;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: clamp(0.9em, 2.5vw, 1em);
-            width: 150px;
-        }
-        .contact-button:hover {
-            background-color: #0056b3;
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: clamp(0.8em, 2vw, 0.9em);
-            color: #333;
-            text-align: left;
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 15px;
-            border-radius: 5px;
-            z-index: 1;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .footer p {
-            margin: 0 0 10px 0;
-        }
-        .signature {
-            margin-top: 20px;
-            font-size: clamp(1em, 3vw, 1.2em);
-            font-weight: bold;
-            color: #ff4500;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 1;
-            width: 100%;
-            box-sizing: border-box;
-        }
         .address-section {
             margin-top: 20px;
             background-color: rgba(255, 255, 255, 0.95);
             padding: 15px;
             border-radius: 5px;
-            text-align: left;
-            z-index: 1;
-            width: 100%;
-            box-sizing: border-box;
+            max-width: none; /* 移除宽度限制 */
+            display: flex; /* 使用 flex 布局 */
+            gap: 20px; /* 地址和二维码间距 */
+            align-items: flex-start; /* 顶部对齐 */
+        }
+        .address-list {
+            min-width: 387px; /* 调整为适合新宽度 */
+            text-align: left; /* 地址列表左对齐 */
         }
         .address-section label {
-            margin: 5px 0 2px 0;
+            margin: 5px 0 2px;
             font-weight: bold;
             font-size: clamp(0.9em, 2.5vw, 1em);
         }
-        .address-section .address-row {
-            display: flex;
-            align-items: center;
+        .address-row {
+            display: block;
             margin-bottom: 5px;
-            flex-wrap: wrap;
         }
         .address-section input {
-            width: 280px; /* 与最长地址（42字符）对齐 */
             padding: 5px;
-            margin-right: 10px;
-            font-size: clamp(0.8em, 2vw, 0.9em);
+            font-size: 14px;
             background-color: #e9ecef;
             border: 1px solid #ccc;
             border-radius: 3px;
-            box-sizing: border-box;
-        }
-        .address-section .energy-address input {
-            color: red; /* 租能量地址显示为红色 */
+            font-family: monospace;
+            width: 317px;
+            min-width: 317px; /* 强制宽度 */
+            white-space: nowrap;
+            overflow-x: auto;
+            position: relative;
+            z-index: 2;
+            font-weight: bold; /* 保持加粗字体 */
         }
         .copy-button {
-            padding: 5px 10px;
             background-color: #28a745;
             color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: clamp(0 екem, 2vw, 0.9em);
+            padding: 5px 10px;
+            font-size: clamp(0.8em, 2vw, 0.9em);
+            border-radius: 3px;
+            margin-left: 5px;
+            width: 55px;
+            position: relative;
+            z-index: 2;
         }
         .copy-button:hover {
             background-color: #218838;
         }
-        @media (max-width: 900px) {
+        .qr-code {
+            text-align: center;
+            min-width: 200px;
+        }
+        .qr-code h3 {
+            margin-bottom: 10px;
+        }
+        .qr-code img {
+            max-width: 200px;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            font-size: clamp(0.8em, 2vw, 0.9em);
+            color: #333;
+        }
+        .signature {
+            font-size: clamp(1em, 3vw, 1.2em);
+            font-weight: bold;
+            color: #ff4500;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            margin-top: 10px;
+        }
+        @media (max-width: 700px) {
             .calculator-container {
                 flex-direction: column;
                 align-items: center;
             }
-            .stats-section, .calculator, .simple-calculator, .trx-converter {
+            .calculator, .stats-section, .simple-calculator, .trx-converter {
                 max-width: 100%;
-                margin: 10px 0;
             }
             .action-buttons {
                 flex-direction: column;
-                gap: 10px;
             }
-            .screenshot-button, .copy-result-button {
+            .btn {
                 width: 100%;
+            }
+            .address-section {
+                flex-direction: column; /* 小屏幕下二维码回到下方 */
+                align-items: center;
+            }
+            .address-list {
+                min-width: 100%;
+                text-align: center;
             }
             .address-section input {
-                width: 100%;
-                max-width: 250px;
+                width: 317px;
+                min-width: 317px; /* 强制宽度 */
+                margin: 0 auto 5px;
+            }
+            .copy-button {
+                display: block;
+                margin: 0 auto;
+                margin-top: 5px;
+            }
+            .qr-code {
+                margin-top: 20px;
+            }
+            .qr-code img {
+                max-width: 150px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- 流星雨 Canvas -->
     <canvas id="meteorCanvas"></canvas>
-
     <div class="calculator-container">
-        <!-- 代付计算器 -->
-        <div class="calculator" id="calculator">
+        <div class="calculator container" id="calculator">
             <h2>胡广生代付计算器</h2>
             <p>实时 USD/CNY 汇率: <span id="realTimeRate">加载中...</span></p>
             <p>汇率获取时间为北京时间: <span id="fetchTime">加载中...</span></p>
-
             <label for="cnyAmount">代付金额 (人民币 CNY):</label>
             <input type="number" id="cnyAmount" placeholder="请输入人民币金额" min="0" step="0.01">
-
             <label for="exchangeRate">代付汇率 (USD/CNY, 实时汇率 - 0.5):</label>
             <input type="number" id="exchangeRate" placeholder="自动计算" step="0.01" readonly>
-
             <label for="lossPercentage">点位 (%):</label>
             <input type="number" id="lossPercentage" placeholder="自动计算" step="0.01" readonly>
-
             <label for="usdReceived">应回款 (USDT):</label>
             <input type="number" id="usdReceived" placeholder="自动计算" step="0.1" readonly>
-
             <label for="bossDeposit">老板预存 (USDT):</label>
             <input type="number" id="bossDeposit" placeholder="请输入预存金额" step="0.01" value="0">
-
             <label for="remainingDeposit">剩余预存 (USDT):</label>
             <input type="number" id="remainingDeposit" placeholder="自动计算" step="0.01" readonly>
-
             <div class="action-buttons">
-                <button class="screenshot-button" id="screenshotButton">截图</button>
-                <button class="copy-result-button" id="copyButton">复制结果</button>
+                <button class="screenshot-button btn" id="screenshotButton">截图</button>
+                <button class="copy-result-button btn" id="copyButton">复制结果</button>
             </div>
         </div>
-
-        <!-- 普通计算器和TRX兑换 -->
-        <div class="stats-section">
-            <!-- 普通计算器 -->
-            <div class="simple-calculator">
+        <div class="stats-section container">
+            <div class="simple-calculator container">
                 <h3>普通计算器</h3>
                 <input type="text" id="calcInput" placeholder="输入算式">
                 <p>结果会自动显示在下方</p>
                 <input type="text" id="calcResult" placeholder="结果" readonly>
             </div>
-
-            <!-- TRX 兑换汇率显示器 -->
-            <div class="trx-converter">
+            <div class="trx-converter container">
                 <h3>TRX 兑换</h3>
                 <a href="https://t.me/ket520" class="contact-button">联系胡广生</a>
                 <label>USDT:</label>
@@ -299,213 +289,128 @@
             </div>
         </div>
     </div>
-
-    <div class="footer" id="announcement">
-        <p>欢迎使用胡广生代付，更高效  更专业  代付点位为实时汇率-0.5，点位并不是固定点位，这个计算器会让你更直观的明白您需要支付的点位。（友情提示：不看征信，不谈感情，只接预付，挂账的免开尊口）</p>
-    </div>
-
-    <div class="address-section">
-        <label>TRC-20地址:</label>
-        <div class="address-row">
-            <input type="text" value="TLddkZqP5Htbu2FHttGKbyLHeF5QXt9qG4" readonly>
-            <button class="copy-button" onclick="copyToClipboard('TLddkZqP5Htbu2FHttGKbyLHeF5QXt9qG4')">复制</button>
+    <div class="address-section container">
+        <div class="address-list">
+            <label>TRC-20地址:</label>
+            <div class="address-row">
+                <input type="text" value="TKquvdHNLWJzqre3QRgeg1snja82akkAUG" readonly>
+                <button class="copy-button" onclick="copyToClipboard('TKquvdHNLWJzqre3QRgeg1snja82akkAUG')">复制</button>
+            </div>
+            <label>ERC-20地址:</label>
+            <div class="address-row">
+                <input type="text" value="0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85" readonly>
+                <button class="copy-button" onclick="copyToClipboard('0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85')">复制</button>
+            </div>
+            <label>BSC(BEP-20)地址:</label>
+            <div class="address-row">
+                <input type="text" value="0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85" readonly>
+                <button class="copy-button" onclick="copyToClipboard('0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85')">复制</button>
+            </div>
         </div>
-
-        <label>ERC-20地址:</label>
-        <div class="address-row">
-            <input type="text" value="0xeb18a7ad1c28b2d66476a48c3a3fbd662c1458d4" readonly>
-            <button class="copy-button" onclick="copyToClipboard('0xeb18a7ad1c28b2d66476a48c3a3fbd662c1458d4')">复制</button>
-        </div>
-
-        <label>BSC(BEP-20)地址:</label>
-        <div class="address-row">
-            <input type="text" value="0xeb18a7ad1c28b2d66476a48c3a3fbd662c1458d4" readonly>
-            <button class="copy-button" onclick="copyToClipboard('0xeb18a7ad1c28b2d66476a48c3a3fbd662c1458d4')">复制</button>
-        </div>
-
-        <label>租能量地址:</label>
-        <div class="address-row energy-address">
-            <input type="text" value="TLddkZqP5Htbu2FHttGKbyLHeF5QXt9qG4" readonly>
-            <button class="copy-button" onclick="copyToClipboard('TLddkZqP5Htbu2FHttGKbyLHeF5QXt9qG4')">复制</button>
+        <div class="qr-code">
+            <h3>汇旺收款二维码</h3>
+            <img src="https://img.131213.xyz/api/cfile/AgACAgUAAx0Eflp52gACtLdoIrXFUbnBO5MmCQdFzi0S6s7ImgACNsYxG_owGVU4IHmrDB-cBwEAAwIAA3kAAzYE" alt="汇旺收款二维码">
         </div>
     </div>
-
-    <div class="signature">
-        认准胡广生，唯一飞机@ket520  备忘网站：胡广生.com
+    <div class="footer container">
+        <p>欢迎使用胡广生代付，更高效 更专业 代付点位为实时汇率-0.5，点位并不是固定点位，这个计算器会让你更直观的明白您需要支付的点位。（友情提示：不看征信，不谈感情，只接预付，借钱、垫资、挂账的免开尊口）</p>
+        <div class="signature">认准胡广生，唯一飞机@ket520  备忘网站：胡广生.com</div>
     </div>
-
     <script>
-        // 流星雨效果
+        const backgroundImages = [
+            'https://picsum.photos/1920/1080?random=1',
+            'https://picsum.photos/1920/1080?random=2',
+            'https://picsum.photos/1920/1080?random=3',
+            'https://picsum.photos/1920/1080?random=4'
+        ];
+        const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
+        document.body.style.backgroundImage = `url('${randomImage}')`;
         const canvas = document.getElementById('meteorCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-
+        const cryptoSymbols = ['🪙', '💰', '🔗', '💎', '⚡'];
+        const colors = ['#FFD700', '#32CD32', '#800080', '#FFA500', '#C0C0C0'];
         const meteors = [];
-
         function createMeteor() {
-            const x = Math.random() * canvas.width;
-            const y = -10;
-            const length = Math.random() * 30 + 20;
-            const speed = Math.random() * 5 + 3;
-            meteors.push({ x, y, length, speed, alpha: 1 });
+            meteors.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height * 1.5 - canvas.height,
+                symbol: cryptoSymbols[Math.floor(Math.random() * cryptoSymbols.length)],
+                color: colors[Math.floor(Math.random() * colors.length)],
+                length: Math.random() * 50 + 30,
+                speed: Math.random() * 2.5 + 1.5,
+                alpha: 1,
+                fontSize: Math.random() * 20 + 20
+            });
         }
-
         function animateMeteors() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            if (Math.random() < 0.1) createMeteor();
+            if (Math.random() < 0.3) createMeteor();
             meteors.forEach((meteor, index) => {
-                const gradient = ctx.createLinearGradient(
-                    meteor.x, meteor.y,
-                    meteor.x - meteor.length, meteor.y + meteor.length
-                );
-                gradient.addColorStop(0, `rgba(0, 255, 0, ${meteor.alpha})`);
-                gradient.addColorStop(1, `rgba(0, 255, 0, 0)`);
-
+                ctx.font = `${meteor.fontSize}px Arial`;
+                const textWidth = ctx.measureText(meteor.symbol).width;
+                const gradient = ctx.createLinearGradient(meteor.x, meteor.y, meteor.x + meteor.length, meteor.y - meteor.length);
+                gradient.addColorStop(0, `${meteor.color}80`);
+                gradient.addColorStop(0.5, `${meteor.color}40`);
+                gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                ctx.fillStyle = meteor.color;
+                ctx.fillText(meteor.symbol, meteor.x - textWidth / 2, meteor.y);
                 ctx.beginPath();
                 ctx.moveTo(meteor.x, meteor.y);
-                ctx.lineTo(meteor.x - meteor.length, meteor.y + meteor.length);
+                ctx.lineTo(meteor.x + meteor.length, meteor.y - meteor.length);
                 ctx.strokeStyle = gradient;
-                ctx.lineWidth = 4;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = '#00ff00';
+                ctx.lineWidth = 1.5;
                 ctx.stroke();
-
                 meteor.y += meteor.speed;
                 meteor.x -= meteor.speed / 2;
-                meteor.alpha -= 0.02;
-
-                if (meteor.y > canvas.height || meteor.x < 0 || meteor.alpha <= 0) {
-                    meteors.splice(index, 1);
-                }
+                meteor.alpha -= 0.01;
+                if (meteor.y > canvas.height * 1.5 || meteor.x < -meteor.length || meteor.alpha <= 0) meteors.splice(index, 1);
             });
             requestAnimationFrame(animateMeteors);
         }
         animateMeteors();
-
-        // 计算器逻辑
-        const cnyAmount = document.getElementById('cnyAmount');
-        const exchangeRate = document.getElementById('exchangeRate');
-        const usdReceived = document.getElementById('usdReceived');
-        const bossDeposit = document.getElementById('bossDeposit');
-        const remainingDeposit = document.getElementById('remainingDeposit');
-        const realTimeRateDisplay = document.getElementById('realTimeRate');
-        const lossPercentageDisplay = document.getElementById('lossPercentage');
-        const fetchTimeDisplay = document.getElementById('fetchTime');
-        const calcInput = document.getElementById('calcInput');
-        const calcResult = document.getElementById('calcResult');
-        const usdtInput = document.getElementById('usdtInput');
-        const trxInput = document.getElementById('trxInput');
-        const screenshotButton = document.getElementById('screenshotButton');
-        const copyButton = document.getElementById('copyButton');
-
-        let realRate = 7.2; // 默认 USD/CNY 汇率 1:7.2
-        let trxRate = 0; // TRX/USDT 实时汇率
-
-        // 检测是否为手机端
+        const elements = {
+            cnyAmount: document.getElementById('cnyAmount'),
+            exchangeRate: document.getElementById('exchangeRate'),
+            usdReceived: document.getElementById('usdReceived'),
+            bossDeposit: document.getElementById('bossDeposit'),
+            remainingDeposit: document.getElementById('remainingDeposit'),
+            realTimeRate: document.getElementById('realTimeRate'),
+            lossPercentage: document.getElementById('lossPercentage'),
+            fetchTime: document.getElementById('fetchTime'),
+            calcInput: document.getElementById('calcInput'),
+            calcResult: document.getElementById('calcResult'),
+            usdtInput: document.getElementById('usdtInput'),
+            trxInput: document.getElementById('trxInput'),
+            screenshotButton: document.getElementById('screenshotButton'),
+            copyButton: document.getElementById('copyButton')
+        };
+        let realRate = 7.2;
+        let trxRate = 4;
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
-            screenshotButton.style.display = 'none'; // 手机端隐藏截图按钮
-            copyButton.textContent = '复制结果';
-            copyButton.onclick = copyResults;
+            elements.screenshotButton.style.display = 'none';
+            elements.copyButton.onclick = copyResults;
         } else {
-            screenshotButton.textContent = '截图';
-            screenshotButton.onclick = captureScreenshot;
-            copyButton.textContent = '复制结果';
-            copyButton.onclick = copyResults;
+            elements.screenshotButton.onclick = captureScreenshot;
+            elements.copyButton.onclick = copyResults;
         }
-
         function getBeijingTime() {
             const now = new Date();
-            const beijingOffset = 8 * 60;
-            const localOffset = now.getTimezoneOffset();
-            const beijingTime = new Date(now.getTime() + (beijingOffset + localOffset) * 60 * 1000);
-            return beijingTime.toLocaleString('zh-CN', { 
-                timeZone: 'Asia/Shanghai', 
-                year: 'numeric', 
-                month: '2-digit', 
-                day: '2-digit', 
-                hour: '2-digit', 
-                minute: '2-digit' 
-            });
+            const beijingTime = new Date(now.getTime() + (8 * 60 + now.getTimezoneOffset()) * 60 * 1000);
+            return beijingTime.toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
         }
-
-        function fetchExchangeRate() {
-            const apiUrl = 'https://api.frankfurter.app/latest?from=USD&to=CNY';
-            fetch(apiUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.rates && data.rates.CNY) {
-                        realRate = data.rates.CNY;
-                        realTimeRateDisplay.textContent = realRate.toFixed(2);
-                        const adjustedRate = realRate - 0.5;
-                        exchangeRate.value = adjustedRate.toFixed(2);
-                        fetchTimeDisplay.textContent = getBeijingTime();
-                    } else {
-                        throw new Error('Invalid API data');
-                    }
-                    calculate();
-                })
-                .catch(error => {
-                    console.error('获取 USD/CNY 汇率失败:', error);
-                    realRate = 7.2;
-                    realTimeRateDisplay.textContent = realRate.toFixed(2);
-                    exchangeRate.value = (realRate - 0.5).toFixed(2);
-                    fetchTimeDisplay.textContent = '无法连接API，使用默认汇率 7.2';
-                    calculate();
-                });
+        function debounce(fn, delay) {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => fn(...args), delay);
+            };
         }
-
-        function calculate() {
-            const cny = parseFloat(cnyAmount.value) || 0;
-            const rate = parseFloat(exchangeRate.value) || 0;
-            const deposit = parseFloat(bossDeposit.value) || 0;
-
-            if (cny < 0) {
-                cnyAmount.value = 0;
-                return;
-            }
-
-            let usdReceivedValue = rate ? (cny / rate) : 0;
-            const baseUsdReceived = Number(usdReceivedValue.toFixed(1)); // 基础应回款，四舍五入到1位小数
-            usdReceivedValue = baseUsdReceived + (deposit < 0 ? Math.abs(deposit) : 0); // 如果预存为负数，应付增加负数的绝对值
-            usdReceived.value = usdReceivedValue;
-
-            const originalUsd = realRate ? (cny / realRate) : 0;
-            const lossPercentage = originalUsd && baseUsdReceived 
-                ? ((originalUsd - baseUsdReceived) / originalUsd * 100) 
-                : 0;
-            lossPercentageDisplay.value = Math.abs(lossPercentage).toFixed(2);
-
-            const remainingValue = deposit - baseUsdReceived; // 剩余预存基于基础应回款计算
-            remainingDeposit.value = remainingValue.toFixed(2);
-            remainingDeposit.classList.remove('positive', 'negative');
-            if (remainingValue > 0) {
-                remainingDeposit.classList.add('positive');
-            } else if (remainingValue < 0) {
-                remainingDeposit.classList.add('negative');
-            }
-        }
-
         function copyToClipboard(text) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(text).then(() => {
-                    alert('已复制到剪贴板，可使用 Ctrl+V 粘贴！');
-                }).catch(err => {
-                    console.error('Clipboard API 失败:', err);
-                    fallbackCopy(text);
-                });
-            } else {
-                console.warn('Clipboard API 不可用，使用回退方法');
-                fallbackCopy(text);
-            }
+            navigator.clipboard?.writeText(text).then(() => alert('已复制到剪贴板！')).catch(() => fallbackCopy(text));
         }
-
         function fallbackCopy(text) {
             const textArea = document.createElement('textarea');
             textArea.value = text;
@@ -513,124 +418,120 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                alert('已复制到剪贴板，可使用 Ctrl+V 粘贴！');
-            } catch (err) {
-                console.error('回退复制失败:', err);
+                alert('已复制到剪贴板！');
+            } catch {
                 alert('复制失败，请手动复制！');
             }
             document.body.removeChild(textArea);
         }
-
         function captureScreenshot() {
             html2canvas(document.getElementById('calculator')).then(canvas => {
                 canvas.toBlob(blob => {
-                    const item = new ClipboardItem({ 'image/png': blob });
-                    navigator.clipboard.write([item]).then(() => {
-                        alert('截图已复制到剪贴板，可使用 Ctrl+V 粘贴！');
-                    }).catch(err => {
-                        console.error('截图复制失败:', err);
-                        alert('截图复制失败，请尝试手动截图！');
-                    });
+                    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => alert('截图已复制到剪贴板！')).catch(() => alert('截图复制失败！'));
                 });
             });
         }
-
-        function copyResults() {
-            const cnyValue = cnyAmount.value || '0';
-            const exchangeRateValue = exchangeRate.value || '0';
-            const lossPercentageValue = lossPercentageDisplay.value || '0';
-            const usdReceivedValue = usdReceived.value || '0';
-            const remainingDepositValue = remainingDeposit.value || '0';
-            const deposit = parseFloat(bossDeposit.value) || 0;
-            const baseUsdReceived = Number((parseFloat(exchangeRate.value) ? (parseFloat(cnyAmount.value) || 0) / parseFloat(exchangeRate.value) : 0).toFixed(1)); // 基础应回款
-
-            let resultText = `代付金额: ${cnyValue}（元）\n代付回款汇率: ${exchangeRateValue}\n换算点位: ${lossPercentageValue}`;
-            
-            if (deposit < 0) {
-                resultText += `\n本次应付: ${baseUsdReceived}(U)\n累积应付: ${usdReceivedValue}(U)`;
-            } else {
-                resultText += `\n应付: ${usdReceivedValue}(U)`;
-            }
-
-            if (deposit > 0) {
-                resultText += `\n剩余预存: ${remainingDepositValue}(U)`;
-            }
-            if (deposit <= 0) {
-                resultText += `\nUSDT-TRC20:\`TLddkZqP5Htbu2FHttGKbyLHeF5QXt9qG4\``;
-            }
-
-            console.log('复制内容:', resultText); // 调试用，检查内容
-            copyToClipboard(resultText);
-        }
-
-        // 普通计算器逻辑
-        function calculateExpression() {
-            const expression = calcInput.value.trim();
-            try {
-                const safeExpression = expression.match(/^[\d+\-*/.()]+$/);
-                if (!safeExpression) throw new Error('无效输入');
-                const result = eval(expression);
-                calcResult.value = Number.isFinite(result) ? result.toFixed(2) : '错误';
-            } catch (error) {
-                calcResult.value = '错误';
-                console.error('计算错误:', error);
-            }
-        }
-
-        // TRX 兑换逻辑
-        function fetchTrxRate() {
-            const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd';
-            fetch(apiUrl)
-                .then(response => response.json())
+        function fetchExchangeRate() {
+            fetch('https://api.frankfurter.app/latest?from=USD&to=CNY')
+                .then(response => response.ok ? response.json() : Promise.reject(`HTTP error: ${response.status}`))
                 .then(data => {
-                    const usdToTrx = data.tron.usd ? (1 / data.tron.usd) : 4;
-                    trxRate = usdToTrx;
-                    const adjustedTrxRate = trxRate - 0.3;
-                    calculateTrxFromUsdt();
+                    realRate = data.rates?.CNY || 7.2;
+                    elements.realTimeRate.textContent = realRate.toFixed(2);
+                    elements.exchangeRate.value = (realRate - 0.5).toFixed(2);
+                    elements.fetchTime.textContent = getBeijingTime();
+                    calculate();
                 })
-                .catch(error => {
-                    console.error('获取 TRX 汇率失败:', error);
-                    trxRate = 4;
-                    const adjustedTrxRate = trxRate - 0.3;
-                    calculateTrxFromUsdt();
+                .catch(() => {
+                    realRate = 7.2;
+                    elements.realTimeRate.textContent = realRate.toFixed(2);
+                    elements.exchangeRate.value = (realRate - 0.5).toFixed(2);
+                    elements.fetchTime.textContent = '无法连接API，使用默认汇率 7.2';
+                    calculate();
                 });
         }
-
-        function calculateTrxFromUsdt() {
-            const usdt = parseFloat(usdtInput.value) || 0;
-            if (usdt < 0) usdtInput.value = 0;
-            const adjustedTrxRate = trxRate - 0.3;
-            const trx = usdt * adjustedTrxRate;
-            trxInput.value = trx.toFixed(2);
+        function fetchTrxRate() {
+            fetch('https://api.coingecko.com/api/v3/simple/price?ids=tron&vs_currencies=usd')
+                .then(response => response.json())
+                .then(data => {
+                    trxRate = data.tron.usd ? (1 / data.tron.usd) : 4;
+                    calculateTrx();
+                })
+                .catch(() => {
+                    trxRate = 4;
+                    calculateTrx();
+                });
         }
-
-        function calculateUsdtFromTrx() {
-            const trx = parseFloat(trxInput.value) || 0;
-            if (trx < 0) trxInput.value = 0;
-            const adjustedTrxRate = trxRate - 0.3;
-            const usdt = trx / adjustedTrxRate;
-            usdtInput.value = usdt.toFixed(2);
+        function calculate() {
+            const cny = parseFloat(elements.cnyAmount.value) || 0;
+            const rate = parseFloat(elements.exchangeRate.value) || 0;
+            const deposit = parseFloat(elements.bossDeposit.value) || 0;
+            if (cny < 0) {
+                elements.cnyAmount.value = 0;
+                return;
+            }
+            let usdReceivedValue = rate ? (cny / rate) : 0;
+            const baseUsdReceived = Number(usdReceivedValue.toFixed(1));
+            usdReceivedValue = baseUsdReceived + (deposit < 0 ? Math.abs(deposit) : 0);
+            elements.usdReceived.value = usdReceivedValue;
+            const originalUsd = realRate ? (cny / realRate) : 0;
+            elements.lossPercentage.value = originalUsd && baseUsdReceived ? Math.abs((originalUsd - baseUsdReceived) / originalUsd * 100).toFixed(2) : 0;
+            const remainingValue = deposit - baseUsdReceived;
+            elements.remainingDeposit.value = remainingValue.toFixed(2);
+            elements.remainingDeposit.classList.toggle('positive', remainingValue > 0);
+            elements.remainingDeposit.classList.toggle('negative', remainingValue < 0);
         }
-
-        // 获取公告内容（静态）
-        const announcement = document.getElementById('announcement');
-        announcement.querySelector('p').textContent = '欢迎使用胡广生代付，更高效 更专业 代付点位为实时汇率-0.5，点位并不是固定点位，这个计算器会让你更直观的明白您需要支付的点位。（友情提示：不看征信，不谈感情，只接预付，借钱、垫资、挂账的免开尊口）';
-
-        // 输入事件监听
-        usdtInput.addEventListener('input', calculateTrxFromUsdt);
-        trxInput.addEventListener('input', calculateUsdtFromTrx);
-        calcInput.addEventListener('input', calculateExpression);
-        cnyAmount.addEventListener('input', () => {
-            if (cnyAmount.value < 0) cnyAmount.value = 0;
-            calculate();
+        function calculateTrx(fromUsdt = true) {
+            const adjustedTrxRate = trxRate - 0.3;
+            if (fromUsdt) {
+                const usdt = parseFloat(elements.usdtInput.value) || 0;
+                if (usdt < 0) elements.usdtInput.value = 0;
+                elements.trxInput.value = (usdt * adjustedTrxRate).toFixed(2);
+            } else {
+                const trx = parseFloat(elements.trxInput.value) || 0;
+                if (trx < 0) elements.trxInput.value = 0;
+                elements.usdtInput.value = (trx / adjustedTrxRate).toFixed(2);
+            }
+        }
+        function copyResults() {
+            const values = {
+                cny: elements.cnyAmount.value || '0',
+                exchangeRate: elements.exchangeRate.value || '0',
+                lossPercentage: elements.lossPercentage.value || '0',
+                usdReceived: elements.usdReceived.value || '0',
+                remainingDeposit: elements.remainingDeposit.value || '0',
+                deposit: parseFloat(elements.bossDeposit.value) || 0,
+                baseUsdReceived: Number(((parseFloat(elements.cnyAmount.value) || 0) / (parseFloat(elements.exchangeRate.value) || 1)).toFixed(1))
+            };
+            let text = `代付金额: ${values.cny}（元）\n代付回款汇率: ${values.exchangeRate}\n换算点位: ${values.lossPercentage}`;
+            text += values.deposit < 0 ? `\n本次应付: ${values.baseUsdReceived}(U)\n累积应付: ${values.usdReceived}(U)` : `\n应付: ${values.usdReceived}(U)`;
+            if (values.deposit > 0) text += `\n剩余预存: ${values.remainingDeposit}(U)`;
+            if (values.deposit <= 0) text += `\nUSDT-TRC20:\`TKquvdHNLWJzqre3QRgeg1snja82akkAUG\``;
+            copyToClipboard(text);
+        }
+        function calculateExpression() {
+            try {
+                const expr = elements.calcInput.value.trim();
+                if (!expr.match(/^[\d+\-*/.()]+$/)) throw new Error('无效输入');
+                const result = eval(expr);
+                elements.calcResult.value = Number.isFinite(result) ? result.toFixed(2) : '错误';
+            } catch {
+                elements.calcResult.value = '错误';
+            }
+        }
+        const debouncedCalculate = debounce(calculate, 100);
+        const debouncedTrx = debounce(calculateTrx, 100);
+        const debouncedCalcExpr = debounce(calculateExpression, 100);
+        elements.cnyAmount.addEventListener('input', () => {
+            if (elements.cnyAmount.value < 0) elements.cnyAmount.value = 0;
+            debouncedCalculate();
         });
-        bossDeposit.addEventListener('input', () => {
-            calculate(); // 允许负数输入，直接触发计算
-        });
-
+        elements.bossDeposit.addEventListener('input', debouncedCalculate);
+        elements.usdtInput.addEventListener('input', () => debouncedTrx(true));
+        elements.trxInput.addEventListener('input', () => debouncedTrx(false));
+        elements.calcInput.addEventListener('input', debouncedCalcExpr);
         fetchExchangeRate();
-        setInterval(fetchExchangeRate, 60000); // 每分钟更新一次汇率
         fetchTrxRate();
+        setInterval(fetchExchangeRate, 60000);
         setInterval(fetchTrxRate, 60000);
     </script>
 </body>
