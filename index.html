@@ -19,7 +19,8 @@
             background-position: center;
             background-attachment: fixed;
             background-repeat: no-repeat;
-            background-color: #f0f0f0; /* 回退背景色 */
+            background-color: #f0f0f0;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="16" cy="16" r="10" fill="gold" opacity="0.7"/><text x="16" y="20" font-size="14" text-anchor="middle" fill="black">₿</text></svg>') 16 16, auto;
         }
         #meteorCanvas {
             position: fixed;
@@ -36,7 +37,7 @@
             border-radius: 5px;
             z-index: 1;
             margin: 10px 0;
-            max-width: none; /* 移除宽度限制 */
+            max-width: none;
         }
         .calculator-container {
             display: flex;
@@ -131,14 +132,14 @@
             background-color: rgba(255, 255, 255, 0.95);
             padding: 15px;
             border-radius: 5px;
-            max-width: none; /* 移除宽度限制 */
-            display: flex; /* 使用 flex 布局 */
-            gap: 20px; /* 地址和二维码间距 */
-            align-items: flex-start; /* 顶部对齐 */
+            max-width: none;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
         }
         .address-list {
-            min-width: 387px; /* 调整为适合新宽度 */
-            text-align: left; /* 地址列表左对齐 */
+            min-width: 387px;
+            text-align: left;
         }
         .address-section label {
             margin: 5px 0 2px;
@@ -157,12 +158,12 @@
             border-radius: 3px;
             font-family: monospace;
             width: 317px;
-            min-width: 317px; /* 强制宽度 */
+            min-width: 317px;
             white-space: nowrap;
             overflow-x: auto;
             position: relative;
             z-index: 2;
-            font-weight: bold; /* 保持加粗字体 */
+            font-weight: bold;
         }
         .copy-button {
             background-color: #28a745;
@@ -186,6 +187,7 @@
             margin-bottom: 10px;
         }
         .qr-code img {
+bundlerOptions: {}
             max-width: 200px;
             height: auto;
             border: 1px solid #ccc;
@@ -222,7 +224,7 @@
                 width: 100%;
             }
             .address-section {
-                flex-direction: column; /* 小屏幕下二维码回到下方 */
+                flex-direction: column;
                 align-items: center;
             }
             .address-list {
@@ -231,7 +233,7 @@
             }
             .address-section input {
                 width: 317px;
-                min-width: 317px; /* 强制宽度 */
+                min-width: 317px;
                 margin: 0 auto 5px;
             }
             .copy-button {
@@ -318,10 +320,10 @@
     </div>
     <script>
         const backgroundImages = [
-            'https://picsum.photos/1920/1080?random=1',
-            'https://picsum.photos/1920/1080?random=2',
-            'https://picsum.photos/1920/1080?random=3',
-            'https://picsum.photos/1920/1080?random=4'
+            'https://images.unsplash.com/photo-1639326269767-6bc3d883fed4?auto=format&fit=crop&w=1920&q=80',
+            'https://images.unsplash.com/photo-1639326269768-6b6c2e7a7f6e?auto=format&fit=crop&w=1920&q=80',
+            'https://images.unsplash.com/photo-1639326269769-7b7c3d883fed?auto=format&fit=crop&w=1920&q=80',
+            'https://images.unsplash.com/photo-1639326269770-8b6c2e7a7f6e?auto=format&fit=crop&w=1920&q=80'
         ];
         const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
         document.body.style.backgroundImage = `url('${randomImage}')`;
@@ -329,43 +331,78 @@
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        const cryptoSymbols = ['🪙', '💰', '🔗', '💎', '⚡'];
+        const cryptoSymbols = ['₿', 'Ξ', 'Ł', '◎', '₳'];
         const colors = ['#FFD700', '#32CD32', '#800080', '#FFA500', '#C0C0C0'];
         const meteors = [];
+        const qrCode = document.querySelector('.qr-code');
+        let qrRect = qrCode.getBoundingClientRect();
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            qrRect = qrCode.getBoundingClientRect();
+        });
         function createMeteor() {
+            let x, y;
+            do {
+                x = Math.random() * canvas.width;
+                y = Math.random() * canvas.height * 1.5 - canvas.height;
+            } while (
+                x > qrRect.left - 100 && x < qrRect.right + 100 &&
+                y > qrRect.top - 100 && y < qrRect.bottom + 100
+            );
             meteors.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height * 1.5 - canvas.height,
+                x: x,
+                y: y,
                 symbol: cryptoSymbols[Math.floor(Math.random() * cryptoSymbols.length)],
                 color: colors[Math.floor(Math.random() * colors.length)],
                 length: Math.random() * 50 + 30,
                 speed: Math.random() * 2.5 + 1.5,
                 alpha: 1,
-                fontSize: Math.random() * 20 + 20
+                fontSize: Math.random() * 20 + 20,
+                rotation: 0,
+                rotationSpeed: Math.random() * 0.05 + 0.05
             });
         }
         function animateMeteors() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (Math.random() < 0.3) createMeteor();
             meteors.forEach((meteor, index) => {
+                meteor.rotation = Math.sin(Date.now() * meteor.rotationSpeed) * Math.PI / 4;
                 ctx.font = `${meteor.fontSize}px Arial`;
                 const textWidth = ctx.measureText(meteor.symbol).width;
-                const gradient = ctx.createLinearGradient(meteor.x, meteor.y, meteor.x + meteor.length, meteor.y - meteor.length);
+                const trailX = meteor.length;
+                const trailY = -meteor.length;
+                const gradient = ctx.createLinearGradient(0, 0, trailX, trailY);
                 gradient.addColorStop(0, `${meteor.color}80`);
                 gradient.addColorStop(0.5, `${meteor.color}40`);
                 gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                ctx.save();
+                ctx.translate(meteor.x, meteor.y);
+                ctx.rotate(meteor.rotation);
                 ctx.fillStyle = meteor.color;
-                ctx.fillText(meteor.symbol, meteor.x - textWidth / 2, meteor.y);
+                ctx.fillText(meteor.symbol, -textWidth / 2, 0);
+                ctx.restore();
+                ctx.save();
+                ctx.translate(meteor.x, meteor.y);
                 ctx.beginPath();
-                ctx.moveTo(meteor.x, meteor.y);
-                ctx.lineTo(meteor.x + meteor.length, meteor.y - meteor.length);
+                ctx.moveTo(0, 0);
+                ctx.lineTo(trailX, trailY);
                 ctx.strokeStyle = gradient;
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
+                ctx.restore();
                 meteor.y += meteor.speed;
                 meteor.x -= meteor.speed / 2;
                 meteor.alpha -= 0.01;
-                if (meteor.y > canvas.height * 1.5 || meteor.x < -meteor.length || meteor.alpha <= 0) meteors.splice(index, 1);
+                if (
+                    meteor.y > canvas.height * 1.5 ||
+                    meteor.x < -meteor.length ||
+                    meteor.alpha <= 0 ||
+                    (meteor.x > qrRect.left - 100 && meteor.x < qrRect.right + 100 &&
+                     meteor.y > qrRect.top - 100 && meteor.y < qrRect.bottom + 100)
+                ) {
+                    meteors.splice(index, 1);
+                }
             });
             requestAnimationFrame(animateMeteors);
         }
