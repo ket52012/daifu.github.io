@@ -59,6 +59,7 @@
             display: block;
             margin: 10px 0 5px;
             font-size: clamp(0.9em, 2.5vw, 1em);
+            text-align: center;
         }
         input {
             padding: 5px;
@@ -200,6 +201,7 @@
         .address-row {
             display: block;
             margin-bottom: 5px;
+            position: relative;
         }
         .address-section input {
             padding: 5px;
@@ -242,6 +244,56 @@
             height: auto;
             border: 1px solid #ccc;
             border-radius: 5px;
+        }
+        .qr-popup {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            transition: opacity 0.2s ease;
+            opacity: 0;
+            min-width: 320px;
+            min-height: 320px;
+        }
+        .qr-popup-top {
+            top: auto;
+            bottom: 100%;
+        }
+        .address-row:hover .qr-popup {
+            display: block;
+            opacity: 1;
+        }
+        .qr-popup img {
+            width: 300px;
+            height: 300px;
+            display: block;
+        }
+        .copy-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .copy-toast.show {
+            display: block;
+            opacity: 1;
         }
         .footer {
             margin-top: 20px;
@@ -300,10 +352,28 @@
             .qr-code img {
                 max-width: 150px;
             }
-            .currency-button {
-                width: 80px;
-                height: 35px;
-                font-size: clamp(0.9em, 2.5vw, 1.1em);
+            .qr-popup {
+                left: 50%;
+                transform: translateX(-50%);
+                top: 50px;
+                min-width: 650px;
+                min-height: 650px;
+                max-width: 90vw;
+                max-height: 90vh;
+            }
+            .qr-popup-top {
+                top: auto;
+                bottom: 50px;
+            }
+            .qr-popup img {
+                width: 800px;
+                height: 800px;
+                max-width: 90vw;
+                max-height: 90vh;
+            }
+            .copy-toast {
+                font-size: 14px;
+                padding: 10px 20px;
             }
         }
     </style>
@@ -317,7 +387,7 @@
             <p>汇率获取时间为北京时间: <span id="fetchTime">加载中...</span></p>
             <label for="cnyAmount">代付金额 (人民币 CNY):</label>
             <input type="number" id="cnyAmount" placeholder="请输入人民币金额" min="0" step="0.01">
-            <label for="exchangeRate">代付汇率 (USD/CNY, 实时汇率 - 0.5):</label>
+            <label for="exchangeRate" id="exchangeRateLabel">代付汇率<br>请先输入金额</label>
             <input type="number" id="exchangeRate" placeholder="自动计算" step="0.01" readonly>
             <label for="lossPercentage">点位 (%):</label>
             <input type="number" id="lossPercentage" placeholder="自动计算" step="0.01" readonly>
@@ -359,16 +429,33 @@
             <div class="address-row">
                 <input type="text" value="TKquvdHNLWJzqre3QRgeg1snja82akkAUG" readonly>
                 <button class="copy-button" onclick="copyToClipboard('TKquvdHNLWJzqre3QRgeg1snja82akkAUG')">复制</button>
+                <div class="qr-popup">
+                    <img src="https://633668.xyz/file/1748705080146_photo_4_2025-05-31_23-24-15.jpg" alt="TRC-20 QR Code">
+                </div>
             </div>
             <label>ERC-20地址:</label>
             <div class="address-row">
                 <input type="text" value="0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85" readonly>
                 <button class="copy-button" onclick="copyToClipboard('0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85')">复制</button>
+                <div class="qr-popup">
+                    <img src="https://633668.xyz/file/1748705083012_photo_1_2025-05-31_23-24-15.jpg" alt="ERC-20 QR Code">
+                </div>
             </div>
             <label>BSC(BEP-20)地址:</label>
             <div class="address-row">
                 <input type="text" value="0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85" readonly>
                 <button class="copy-button" onclick="copyToClipboard('0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85')">复制</button>
+                <div class="qr-popup qr-popup-top">
+                    <img src="https://633668.xyz/file/1748705086186_photo_2_2025-05-31_23-24-15.jpg" alt="BSC QR Code">
+                </div>
+            </div>
+            <label>Solana地址:</label>
+            <div class="address-row">
+                <input type="text" value="Ghu8dwz6LdYs4C8v3jFqNcCYTiz8TgvumCowjMukJFMj" readonly>
+                <button class="copy-button" onclick="copyToClipboard('Ghu8dwz6LdYs4C8v3jFqNcCYTiz8TgvumCowjMukJFMj')">复制</button>
+                <div class="qr-popup qr-popup-top">
+                    <img src="https://633668.xyz/file/1748705083518_photo_3_2025-05-31_23-24-15.jpg" alt="Solana QR Code">
+                </div>
             </div>
         </div>
         <div class="qr-code">
@@ -377,7 +464,7 @@
         </div>
     </div>
     <div class="footer container">
-        <p>欢迎使用胡广生代付，更高效 更专业 代付点位为实时汇率-0.5，点位并不是固定点位，这个计算器会让你更直观的明白您需要支付的点位。（友情提示：不看征信，不谈感情，只接预付，借钱、垫资、挂账的免开尊口）</p>
+        <p>欢迎使用胡广生代付，更高效 更专业 代付点位按金额分段：1-100元(实时汇率-0.65)、101-999元(实时汇率-0.6)、1000-2999元(实时汇率-0.55)、3000元以上(实时汇率-0.5)，点位并非固定值，此计算器帮你直观了解支付点位。（友情提示：不看征信，不谈感情，只接预付，借钱、垫资、挂账的免开尊口）</p>
         <div class="signature">认准胡广生，唯一飞机@ket520  备忘网站：胡广生.com</div>
     </div>
     <script>
@@ -440,7 +527,7 @@
                     meteor.x < -meteor.length ||
                     meteor.alpha <= 0 ||
                     (meteor.x > qrRect.left - 100 && meteor.x < qrRect.right + 100 &&
-                     meteor.y > qrRect.top - 100 && meteor.y < qrRect.bottom + 100)
+                     meteor.y > qrRect.top - 100 && y < qrRect.bottom + 100)
                 ) {
                     meteors.splice(index, 1);
                 }
@@ -451,6 +538,7 @@
         const elements = {
             cnyAmount: document.getElementById('cnyAmount'),
             exchangeRate: document.getElementById('exchangeRate'),
+            exchangeRateLabel: document.getElementById('exchangeRateLabel'),
             usdReceived: document.getElementById('usdReceived'),
             bossDeposit: document.getElementById('bossDeposit'),
             remainingDeposit: document.getElementById('remainingDeposit'),
@@ -490,8 +578,25 @@
                 timeout = setTimeout(() => fn(...args), delay);
             };
         }
+        function showCopyToast() {
+            let toast = document.querySelector('.copy-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.className = 'copy-toast';
+                toast.textContent = '复制成功';
+                document.body.appendChild(toast);
+            }
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
         function copyToClipboard(text) {
-            navigator.clipboard?.writeText(text).then(() => alert('已复制到剪贴板！')).catch(() => fallbackCopy(text));
+            navigator.clipboard?.writeText(text).then(() => {
+                showCopyToast();
+            }).catch(() => {
+                fallbackCopy(text);
+            });
         }
         function fallbackCopy(text) {
             const textArea = document.createElement('textarea');
@@ -500,16 +605,42 @@
             textArea.select();
             try {
                 document.execCommand('copy');
-                alert('已复制到剪贴板！');
+                showCopyToast();
             } catch {
-                alert('复制失败，请手动复制！');
+                const toast = document.createElement('div');
+                toast.className = 'copy-toast';
+                toast.textContent = '复制失败，请手动复制！';
+                document.body.appendChild(toast);
+                toast.classList.add('show');
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000);
             }
             document.body.removeChild(textArea);
         }
+        document.addEventListener('keydown', (event) => {
+            if (event.keyCode === 13) { // 回车键
+                const toast = document.querySelector('.copy-toast.show');
+                if (toast) {
+                    toast.classList.remove('show');
+                }
+            }
+        });
         function captureScreenshot() {
             html2canvas(document.getElementById('calculator')).then(canvas => {
                 canvas.toBlob(blob => {
-                    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => alert('截图已复制到剪贴板！')).catch(() => alert('截图复制失败！'));
+                    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
+                        showCopyToast();
+                    }).catch(() => {
+                        const toast = document.createElement('div');
+                        toast.className = 'copy-toast';
+                        toast.textContent = '截图复制失败！';
+                        document.body.appendChild(toast);
+                        toast.classList.add('show');
+                        setTimeout(() => {
+                            toast.classList.remove('show');
+                        }, 2000);
+                    });
                 });
             });
         }
@@ -519,14 +650,11 @@
                 .then(data => {
                     realRate = data.rates?.CNY || 7.2;
                     elements.realTimeRate.textContent = realRate.toFixed(2);
-                    elements.exchangeRate.value = (realRate - 0.5).toFixed(2);
-                    elements.fetchTime.textContent = getBeijingTime();
                     calculate();
                 })
                 .catch(() => {
                     realRate = 7.2;
                     elements.realTimeRate.textContent = realRate.toFixed(2);
-                    elements.exchangeRate.value = (realRate - 0.5).toFixed(2);
                     elements.fetchTime.textContent = '无法连接API，使用默认汇率 7.2';
                     calculate();
                 });
@@ -543,13 +671,30 @@
         }
         function calculate() {
             const cny = parseFloat(elements.cnyAmount.value) || 0;
-            const rate = parseFloat(elements.exchangeRate.value) || 0;
             const deposit = parseFloat(elements.bossDeposit.value) || 0;
             if (cny < 0) {
                 elements.cnyAmount.value = 0;
                 return;
             }
-            let usdReceivedValue = rate ? (cny / rate) : 0;
+            let exchangeRate;
+            if (cny >= 1 && cny <= 100) {
+                exchangeRate = realRate - 0.65;
+                elements.exchangeRateLabel.innerHTML = '代付汇率<br>1-100元 (实时汇率 - 0.65)';
+            } else if (cny >= 101 && cny <= 999) {
+                exchangeRate = realRate - 0.6;
+                elements.exchangeRateLabel.innerHTML = '代付汇率<br>101-999元 (实时汇率 - 0.6)';
+            } else if (cny >= 1000 && cny <= 2999) {
+                exchangeRate = realRate - 0.55;
+                elements.exchangeRateLabel.innerHTML = '代付汇率<br>1000-2999元 (实时汇率 - 0.55)';
+            } else if (cny >= 3000) {
+                exchangeRate = realRate - 0.5;
+                elements.exchangeRateLabel.innerHTML = '代付汇率<br>3000元及以上 (实时汇率 - 0.5)';
+            } else {
+                exchangeRate = 0;
+                elements.exchangeRateLabel.innerHTML = '代付汇率<br>请先输入金额';
+            }
+            elements.exchangeRate.value = exchangeRate.toFixed(2);
+            let usdReceivedValue = exchangeRate ? (cny / exchangeRate) : 0;
             const baseUsdReceived = Number(usdReceivedValue.toFixed(1));
             usdReceivedValue = baseUsdReceived + (deposit < 0 ? Math.abs(deposit) : 0);
             elements.usdReceived.value = usdReceivedValue;
@@ -559,6 +704,7 @@
             elements.remainingDeposit.value = remainingValue.toFixed(2);
             elements.remainingDeposit.classList.toggle('positive', remainingValue > 0);
             elements.remainingDeposit.classList.toggle('negative', remainingValue < 0);
+            elements.fetchTime.textContent = getBeijingTime();
         }
         function calculateTrx(fromTrx = false) {
             const trxValue = elements.trxInput.value.trim();
@@ -575,13 +721,13 @@
                         elements.trxInput.value = '';
                         return;
                     }
-                    elements.currencyInput.value = (trx / adjustedTrxRate).toFixed(2);
+                    elements.currencyInput.value = (trx / adjustedTrxRate).toFixed(1);
                 } else if (!fromTrx && currencyValue) {
                     if (usdt < 0) {
                         elements.currencyInput.value = '';
                         return;
                     }
-                    elements.trxInput.value = (usdt * adjustedTrxRate).toFixed(2);
+                    elements.trxInput.value = (usdt * adjustedTrxRate).toFixed(1);
                 }
             } else {
                 const adjustedTrxCnyRate = (1 / trxRate * realRate) + 0.5;
@@ -592,13 +738,13 @@
                         elements.trxInput.value = '';
                         return;
                     }
-                    elements.currencyInput.value = (trx * adjustedTrxCnyRate).toFixed(2);
+                    elements.currencyInput.value = (trx * adjustedTrxCnyRate).toFixed(1);
                 } else if (!fromTrx && currencyValue) {
                     if (cny < 0) {
                         elements.currencyInput.value = '';
                         return;
                     }
-                    elements.trxInput.value = (cny / adjustedTrxCnyRate).toFixed(2);
+                    elements.trxInput.value = (cny / adjustedTrxCnyRate).toFixed(1);
                 }
             }
         }
