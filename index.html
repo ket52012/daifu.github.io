@@ -199,9 +199,11 @@
             font-size: clamp(0.9em, 2.5vw, 1em);
         }
         .address-row {
-            display: block;
+            display: flex;
+            align-items: center;
             margin-bottom: 5px;
             position: relative;
+            flex-wrap: wrap;
         }
         .address-section input {
             padding: 5px;
@@ -218,7 +220,7 @@
             z-index: 2;
             font-weight: bold;
         }
-        .copy-button {
+        .copy-button, .view-qr-button {
             background-color: #28a745;
             color: white;
             padding: 5px 10px;
@@ -228,8 +230,10 @@
             width: 55px;
             position: relative;
             z-index: 2;
+            border: none;
+            cursor: pointer;
         }
-        .copy-button:hover {
+        .copy-button:hover, .view-qr-button:hover {
             background-color: #218838;
         }
         .qr-code {
@@ -266,7 +270,7 @@
             top: auto;
             bottom: 100%;
         }
-        .address-row:hover .qr-popup {
+        .address-row:hover .qr-popup:not(.mobile-qr-popup) {
             display: block;
             opacity: 1;
         }
@@ -274,6 +278,41 @@
             width: 300px;
             height: 300px;
             display: block;
+        }
+        .mobile-qr-popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            max-width: 90vw;
+            max-height: 90vh;
+            text-align: center;
+        }
+        .mobile-qr-popup img {
+            width: 300px;
+            height: 300px;
+            max-width: 80vw;
+            max-height: 80vh;
+        }
+        .mobile-qr-popup button {
+            margin-top: 15px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: clamp(0.9em, 2.5vw, 1em);
+        }
+        .mobile-qr-popup button:hover {
+            background-color: #0056b3;
         }
         .copy-toast {
             position: fixed;
@@ -341,10 +380,9 @@
                 min-width: 317px;
                 margin: 0 auto 5px;
             }
-            .copy-button {
-                display: block;
-                margin: 0 auto;
-                margin-top: 5px;
+            .copy-button, .view-qr-button {
+                display: inline-block;
+                margin: 0 2px 5px;
             }
             .qr-code {
                 margin-top: 20px;
@@ -352,28 +390,8 @@
             .qr-code img {
                 max-width: 150px;
             }
-            .qr-popup {
-                left: 50%;
-                transform: translateX(-50%);
-                top: 50px;
-                min-width: 650px;
-                min-height: 650px;
-                max-width: 90vw;
-                max-height: 90vh;
-            }
-            .qr-popup-top {
-                top: auto;
-                bottom: 50px;
-            }
-            .qr-popup img {
-                width: 800px;
-                height: 800px;
-                max-width: 90vw;
-                max-height: 90vh;
-            }
-            .copy-toast {
-                font-size: 14px;
-                padding: 10px 20px;
+            .qr-popup:not(.mobile-qr-popup) {
+                display: none !important;
             }
         }
     </style>
@@ -429,6 +447,7 @@
             <div class="address-row">
                 <input type="text" value="TKquvdHNLWJzqre3QRgeg1snja82akkAUG" readonly>
                 <button class="copy-button" onclick="copyToClipboard('TKquvdHNLWJzqre3QRgeg1snja82akkAUG')">复制</button>
+                <button class="view-qr-button" onclick="showMobileQR('https://633668.xyz/file/1748705080146_photo_4_2025-05-31_23-24-15.jpg', 'TRC-20 QR Code')">查看二维码</button>
                 <div class="qr-popup">
                     <img src="https://633668.xyz/file/1748705080146_photo_4_2025-05-31_23-24-15.jpg" alt="TRC-20 QR Code">
                 </div>
@@ -437,6 +456,7 @@
             <div class="address-row">
                 <input type="text" value="0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85" readonly>
                 <button class="copy-button" onclick="copyToClipboard('0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85')">复制</button>
+                <button class="view-qr-button" onclick="showMobileQR('https://633668.xyz/file/1748705083012_photo_1_2025-05-31_23-24-15.jpg', 'ERC-20 QR Code')">查看二维码</button>
                 <div class="qr-popup">
                     <img src="https://633668.xyz/file/1748705083012_photo_1_2025-05-31_23-24-15.jpg" alt="ERC-20 QR Code">
                 </div>
@@ -445,6 +465,7 @@
             <div class="address-row">
                 <input type="text" value="0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85" readonly>
                 <button class="copy-button" onclick="copyToClipboard('0x14F4A547E438f39CC3a0C561561189Fe2F5Bad85')">复制</button>
+                <button class="view-qr-button" onclick="showMobileQR('https://633668.xyz/file/1748705086186_photo_2_2025-05-31_23-24-15.jpg', 'BSC QR Code')">查看二维码</button>
                 <div class="qr-popup qr-popup-top">
                     <img src="https://633668.xyz/file/1748705086186_photo_2_2025-05-31_23-24-15.jpg" alt="BSC QR Code">
                 </div>
@@ -453,6 +474,7 @@
             <div class="address-row">
                 <input type="text" value="Ghu8dwz6LdYs4C8v3jFqNcCYTiz8TgvumCowjMukJFMj" readonly>
                 <button class="copy-button" onclick="copyToClipboard('Ghu8dwz6LdYs4C8v3jFqNcCYTiz8TgvumCowjMukJFMj')">复制</button>
+                <button class="view-qr-button" onclick="showMobileQR('https://633668.xyz/file/1748705083518_photo_3_2025-05-31_23-24-15.jpg', 'Solana QR Code')">查看二维码</button>
                 <div class="qr-popup qr-popup-top">
                     <img src="https://633668.xyz/file/1748705083518_photo_3_2025-05-31_23-24-15.jpg" alt="Solana QR Code">
                 </div>
@@ -462,6 +484,10 @@
             <h3>汇旺收款二维码</h3>
             <img src="https://img.131213.xyz/api/cfile/AgACAgUAAx0Eflp52gACtLdoIrXFUbnBO5MmCQdFzi0S6s7ImgACNsYxG_owGVU4IHmrDB-cBwEAAwIAA3kAAzYE" alt="汇旺收款二维码">
         </div>
+    </div>
+    <div class="mobile-qr-popup" id="mobileQrPopup">
+        <img id="mobileQrImage" src="" alt="">
+        <button onclick="closeMobileQR()">确认</button>
     </div>
     <div class="footer container">
         <p>欢迎使用胡广生代付，更高效 更专业 代付点位按金额分段：1-100元(实时汇率-0.65)、101-999元(实时汇率-0.6)、1000-2999元(实时汇率-0.55)、3000元以上(实时汇率-0.5)，点位并非固定值，此计算器帮你直观了解支付点位。（友情提示：不看征信，不谈感情，只接预付，借钱、垫资、挂账的免开尊口）</p>
@@ -562,9 +588,24 @@
         if (isMobile) {
             elements.screenshotButton.style.display = 'none';
             elements.copyButton.onclick = copyResults;
+            document.querySelectorAll('.view-qr-button').forEach(button => button.style.display = 'inline-block');
         } else {
             elements.screenshotButton.onclick = captureScreenshot;
             elements.copyButton.onclick = copyResults;
+            document.querySelectorAll('.view-qr-button').forEach(button => button.style.display = 'none');
+        }
+        function showMobileQR(src, alt) {
+            if (isMobile) {
+                const popup = document.getElementById('mobileQrPopup');
+                const img = document.getElementById('mobileQrImage');
+                img.src = src;
+                img.alt = alt;
+                popup.style.display = 'block';
+            }
+        }
+        function closeMobileQR() {
+            const popup = document.getElementById('mobileQrPopup');
+            popup.style.display = 'none';
         }
         function getBeijingTime() {
             const now = new Date();
@@ -619,10 +660,13 @@
             document.body.removeChild(textArea);
         }
         document.addEventListener('keydown', (event) => {
-            if (event.keyCode === 13) { // 回车键
+            if (event.keyCode === 13) {
                 const toast = document.querySelector('.copy-toast.show');
                 if (toast) {
                     toast.classList.remove('show');
+                }
+                if (isMobile) {
+                    closeMobileQR();
                 }
             }
         });
@@ -710,7 +754,7 @@
             const trxValue = elements.trxInput.value.trim();
             const currencyValue = elements.currencyInput.value.trim();
             if (!trxValue && !currencyValue) {
-                return; // 如果两个输入框都为空，不执行计算
+                return;
             }
             if (currencyMode === 'USDT') {
                 const adjustedTrxRate = trxRate - 0.3;
@@ -803,7 +847,6 @@
         elements.currencyInput.addEventListener('input', () => debouncedTrx(false));
         elements.trxInput.addEventListener('input', () => debouncedTrx(true));
         elements.calcInput.addEventListener('input', debouncedCalcExpr);
-        // 初始化时清空输入框
         elements.trxInput.value = '';
         elements.currencyInput.value = '';
         fetchExchangeRate();
