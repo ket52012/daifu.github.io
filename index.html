@@ -86,30 +86,44 @@
             margin-top: 20px;
             display: flex;
             justify-content: space-between;
-            gap: 10px;
+            gap: 1mm;
         }
         .btn {
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
             font-size: clamp(0.9em, 2.5vw, 1em);
             width: 48%;
-        }
-        .screenshot-button, .copy-result-button {
-            background-color: #ff4500;
+            height: 40px;
             color: white;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .screenshot-button {
+            background: linear-gradient(135deg, #ff4500 0%, #cc3700 100%);
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%);
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+        .copy-result-button {
+            background: linear-gradient(135deg, #ff4500 0%, #cc3700 100%);
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
         }
         .screenshot-button:hover, .copy-result-button:hover {
-            background-color: #cc3700;
+            filter: brightness(1.2);
         }
         .contact-button {
             background-color: #007bff;
             color: white;
             text-decoration: none;
             display: block;
-            margin: 10px auto 0;
+            margin: 20px auto 0;
+            padding: 10px 20px;
             width: 150px;
+            border-radius: 8px;
         }
         .contact-button:hover {
             background-color: #0056b3;
@@ -126,6 +140,43 @@
             font-size: clamp(0.8em, 2vw, 0.9em);
             color: #666;
             margin: 5px 0;
+        }
+        .currency-buttons {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+            gap: 1mm;
+        }
+        .currency-button {
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: clamp(1em, 2.5vw, 1.2em);
+            color: white;
+            width: 100px;
+            height: 40px;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .currency-button.usdt {
+            background: linear-gradient(135deg, #00CED1 0%, #00B7EB 100%);
+            clip-path: polygon(0 0, 100% 0, 90% 100%, 0 100%);
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+        .currency-button.cny {
+            background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+            clip-path: polygon(10% 0, 100% 0, 100% 100%, 0 100%);
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+        .currency-button.active {
+            transform: scale(1.05);
+            box-shadow: inset 0 4px 8px rgba(255, 255, 255, 0.4), 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        .currency-button:hover {
+            filter: brightness(1.2);
         }
         .address-section {
             margin-top: 20px;
@@ -187,7 +238,6 @@
             margin-bottom: 10px;
         }
         .qr-code img {
-bundlerOptions: {}
             max-width: 200px;
             height: auto;
             border: 1px solid #ccc;
@@ -218,10 +268,13 @@ bundlerOptions: {}
                 max-width: 100%;
             }
             .action-buttons {
-                flex-direction: column;
+                flex-direction: row;
+                gap: 1mm;
             }
             .btn {
-                width: 100%;
+                width: 48%;
+                height: 35px;
+                font-size: clamp(0.9em, 2.5vw, 1.1em);
             }
             .address-section {
                 flex-direction: column;
@@ -247,6 +300,11 @@ bundlerOptions: {}
             .qr-code img {
                 max-width: 150px;
             }
+            .currency-button {
+                width: 80px;
+                height: 35px;
+                font-size: clamp(0.9em, 2.5vw, 1.1em);
+            }
         }
     </style>
 </head>
@@ -270,8 +328,8 @@ bundlerOptions: {}
             <label for="remainingDeposit">剩余预存 (USDT):</label>
             <input type="number" id="remainingDeposit" placeholder="自动计算" step="0.01" readonly>
             <div class="action-buttons">
-                <button class="screenshot-button btn" id="screenshotButton">截图</button>
-                <button class="copy-result-button btn" id="copyButton">复制结果</button>
+                <button class="btn screenshot-button" id="screenshotButton">截图</button>
+                <button class="btn copy-result-button" id="copyButton">复制结果</button>
             </div>
         </div>
         <div class="stats-section container">
@@ -283,11 +341,15 @@ bundlerOptions: {}
             </div>
             <div class="trx-converter container">
                 <h3>TRX 兑换</h3>
-                <a href="https://t.me/ket520" class="contact-button">联系胡广生</a>
-                <label>USDT:</label>
-                <input type="number" id="usdtInput" placeholder="输入 USDT" min="0" step="0.01">
+                <div class="currency-buttons">
+                    <button class="currency-button usdt active" id="usdtButton">USDT</button>
+                    <button class="currency-button cny" id="cnyButton">人民币</button>
+                </div>
                 <label>TRX:</label>
-                <input type="number" id="trxInput" placeholder="输入 TRX" min="0" step="0.01">
+                <input type="number" id="trxInput" placeholder="输入TRX" min="0" step="0.01">
+                <label id="currencyLabel">USDT:</label>
+                <input type="number" id="currencyInput" placeholder="输入USDT" min="0" step="0.01">
+                <a href="https://t.me/ket520" class="contact-button">联系胡广生</a>
             </div>
         </div>
     </div>
@@ -319,19 +381,11 @@ bundlerOptions: {}
         <div class="signature">认准胡广生，唯一飞机@ket520  备忘网站：胡广生.com</div>
     </div>
     <script>
-        const backgroundImages = [
-            'https://images.unsplash.com/photo-1639326269767-6bc3d883fed4?auto=format&fit=crop&w=1920&q=80',
-            'https://images.unsplash.com/photo-1639326269768-6b6c2e7a7f6e?auto=format&fit=crop&w=1920&q=80',
-            'https://images.unsplash.com/photo-1639326269769-7b7c3d883fed?auto=format&fit=crop&w=1920&q=80',
-            'https://images.unsplash.com/photo-1639326269770-8b6c2e7a7f6e?auto=format&fit=crop&w=1920&q=80'
-        ];
-        const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
-        document.body.style.backgroundImage = `url('${randomImage}')`;
+        document.body.style.backgroundImage = `url('https://633668.xyz/file/1748691226654_12173908941302.jpg')`;
         const canvas = document.getElementById('meteorCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        const cryptoSymbols = ['₿', 'Ξ', 'Ł', '◎', '₳'];
         const colors = ['#FFD700', '#32CD32', '#800080', '#FFA500', '#C0C0C0'];
         const meteors = [];
         const qrCode = document.querySelector('.qr-code');
@@ -353,35 +407,22 @@ bundlerOptions: {}
             meteors.push({
                 x: x,
                 y: y,
-                symbol: cryptoSymbols[Math.floor(Math.random() * cryptoSymbols.length)],
                 color: colors[Math.floor(Math.random() * colors.length)],
                 length: Math.random() * 50 + 30,
                 speed: Math.random() * 2.5 + 1.5,
-                alpha: 1,
-                fontSize: Math.random() * 20 + 20,
-                rotation: 0,
-                rotationSpeed: Math.random() * 0.05 + 0.05
+                alpha: 1
             });
         }
         function animateMeteors() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (Math.random() < 0.3) createMeteor();
             meteors.forEach((meteor, index) => {
-                meteor.rotation = Math.sin(Date.now() * meteor.rotationSpeed) * Math.PI / 4;
-                ctx.font = `${meteor.fontSize}px Arial`;
-                const textWidth = ctx.measureText(meteor.symbol).width;
                 const trailX = meteor.length;
                 const trailY = -meteor.length;
                 const gradient = ctx.createLinearGradient(0, 0, trailX, trailY);
                 gradient.addColorStop(0, `${meteor.color}80`);
                 gradient.addColorStop(0.5, `${meteor.color}40`);
                 gradient.addColorStop(1, `rgba(255, 255, 255, 0)`);
-                ctx.save();
-                ctx.translate(meteor.x, meteor.y);
-                ctx.rotate(meteor.rotation);
-                ctx.fillStyle = meteor.color;
-                ctx.fillText(meteor.symbol, -textWidth / 2, 0);
-                ctx.restore();
                 ctx.save();
                 ctx.translate(meteor.x, meteor.y);
                 ctx.beginPath();
@@ -418,13 +459,17 @@ bundlerOptions: {}
             fetchTime: document.getElementById('fetchTime'),
             calcInput: document.getElementById('calcInput'),
             calcResult: document.getElementById('calcResult'),
-            usdtInput: document.getElementById('usdtInput'),
+            usdtButton: document.getElementById('usdtButton'),
+            cnyButton: document.getElementById('cnyButton'),
+            currencyInput: document.getElementById('currencyInput'),
+            currencyLabel: document.getElementById('currencyLabel'),
             trxInput: document.getElementById('trxInput'),
             screenshotButton: document.getElementById('screenshotButton'),
             copyButton: document.getElementById('copyButton')
         };
         let realRate = 7.2;
         let trxRate = 4;
+        let currencyMode = 'USDT';
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         if (isMobile) {
             elements.screenshotButton.style.display = 'none';
@@ -491,11 +536,9 @@ bundlerOptions: {}
                 .then(response => response.json())
                 .then(data => {
                     trxRate = data.tron.usd ? (1 / data.tron.usd) : 4;
-                    calculateTrx();
                 })
                 .catch(() => {
                     trxRate = 4;
-                    calculateTrx();
                 });
         }
         function calculate() {
@@ -517,16 +560,46 @@ bundlerOptions: {}
             elements.remainingDeposit.classList.toggle('positive', remainingValue > 0);
             elements.remainingDeposit.classList.toggle('negative', remainingValue < 0);
         }
-        function calculateTrx(fromUsdt = true) {
-            const adjustedTrxRate = trxRate - 0.3;
-            if (fromUsdt) {
-                const usdt = parseFloat(elements.usdtInput.value) || 0;
-                if (usdt < 0) elements.usdtInput.value = 0;
-                elements.trxInput.value = (usdt * adjustedTrxRate).toFixed(2);
+        function calculateTrx(fromTrx = false) {
+            const trxValue = elements.trxInput.value.trim();
+            const currencyValue = elements.currencyInput.value.trim();
+            if (!trxValue && !currencyValue) {
+                return; // 如果两个输入框都为空，不执行计算
+            }
+            if (currencyMode === 'USDT') {
+                const adjustedTrxRate = trxRate - 0.3;
+                const trx = parseFloat(trxValue) || 0;
+                const usdt = parseFloat(currencyValue) || 0;
+                if (fromTrx && trxValue) {
+                    if (trx < 0) {
+                        elements.trxInput.value = '';
+                        return;
+                    }
+                    elements.currencyInput.value = (trx / adjustedTrxRate).toFixed(2);
+                } else if (!fromTrx && currencyValue) {
+                    if (usdt < 0) {
+                        elements.currencyInput.value = '';
+                        return;
+                    }
+                    elements.trxInput.value = (usdt * adjustedTrxRate).toFixed(2);
+                }
             } else {
-                const trx = parseFloat(elements.trxInput.value) || 0;
-                if (trx < 0) elements.trxInput.value = 0;
-                elements.usdtInput.value = (trx / adjustedTrxRate).toFixed(2);
+                const adjustedTrxCnyRate = (1 / trxRate * realRate) + 0.5;
+                const trx = parseFloat(trxValue) || 0;
+                const cny = parseFloat(currencyValue) || 0;
+                if (fromTrx && trxValue) {
+                    if (trx < 0) {
+                        elements.trxInput.value = '';
+                        return;
+                    }
+                    elements.currencyInput.value = (trx * adjustedTrxCnyRate).toFixed(2);
+                } else if (!fromTrx && currencyValue) {
+                    if (cny < 0) {
+                        elements.currencyInput.value = '';
+                        return;
+                    }
+                    elements.trxInput.value = (cny / adjustedTrxCnyRate).toFixed(2);
+                }
             }
         }
         function copyResults() {
@@ -555,6 +628,24 @@ bundlerOptions: {}
                 elements.calcResult.value = '错误';
             }
         }
+        elements.usdtButton.addEventListener('click', () => {
+            currencyMode = 'USDT';
+            elements.usdtButton.classList.add('active');
+            elements.cnyButton.classList.remove('active');
+            elements.currencyLabel.textContent = 'USDT:';
+            elements.currencyInput.placeholder = '输入USDT';
+            elements.currencyInput.value = '';
+            elements.trxInput.value = '';
+        });
+        elements.cnyButton.addEventListener('click', () => {
+            currencyMode = 'CNY';
+            elements.cnyButton.classList.add('active');
+            elements.usdtButton.classList.remove('active');
+            elements.currencyLabel.textContent = '人民币:';
+            elements.currencyInput.placeholder = '输入人民币';
+            elements.currencyInput.value = '';
+            elements.trxInput.value = '';
+        });
         const debouncedCalculate = debounce(calculate, 100);
         const debouncedTrx = debounce(calculateTrx, 100);
         const debouncedCalcExpr = debounce(calculateExpression, 100);
@@ -563,9 +654,12 @@ bundlerOptions: {}
             debouncedCalculate();
         });
         elements.bossDeposit.addEventListener('input', debouncedCalculate);
-        elements.usdtInput.addEventListener('input', () => debouncedTrx(true));
-        elements.trxInput.addEventListener('input', () => debouncedTrx(false));
+        elements.currencyInput.addEventListener('input', () => debouncedTrx(false));
+        elements.trxInput.addEventListener('input', () => debouncedTrx(true));
         elements.calcInput.addEventListener('input', debouncedCalcExpr);
+        // 初始化时清空输入框
+        elements.trxInput.value = '';
+        elements.currencyInput.value = '';
         fetchExchangeRate();
         fetchTrxRate();
         setInterval(fetchExchangeRate, 60000);
